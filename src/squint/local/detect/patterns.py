@@ -13,6 +13,7 @@ PATTERNS = [
     # Fallback: four number groups of 3-5 digits on one line = probably a card the OCR
     # misread. Redacted anyway (recall over precision), flagged with lower confidence.
     ("card",    re.compile(r"(?<!\d)(?:\d{3,5}[ -]?){3}\d{3,5}(?!\d)"), 0.5),
+    ("address", re.compile(r"(?<!\d)\d{1,4},\s[^,\n]+(?:,\s[^,\n]+){1,3}?\s\d{6}(?!\d)"), 0.8),
 ]
 
 

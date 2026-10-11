@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --bg:#f4f5f7; --card:#ffffff; --fg:#111111; --muted:#555555; --line:#cccccc; --accent:#1a73e8; }
+  {% if theme == 'dark' %}
+  :root { --bg:#14161a; --card:#1e2127; --fg:#e8e8e8; --muted:#9aa0a6; --line:#3a3f47; --accent:#4c8df6; }
+  {% endif %}
+  html { font-size: {{ root_px }}px; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:{{ font }}; }
+  .wrap { max-width:{{ wrap_rem }}rem; margin:2rem auto; background:var(--card); padding:2rem; border-radius:.75rem; }
+  h1 { margin:0 0 1.25rem; font-size:1.8rem; }
+  .muted { color:var(--muted); font-size:.85rem; }
+  .pii { white-space:nowrap; }
+  .profile { display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; }
+  .face { border-radius:50%; object-fit:cover; display:block; }
+  .field { margin-bottom:1rem; }
+  .field label { display:block; font-size:.8rem; color:var(--muted); margin-bottom:.25rem; }
+  .input { border:1px solid var(--line); border-radius:.4rem; padding:.6rem .75rem; font-size:1rem; }
+  .summary { background:var(--bg); padding:.75rem; border-radius:.5rem; margin:1rem 0; }
+  button { background:var(--accent); color:#fff; border:0; padding:.8rem 1.6rem; font-size:1rem; border-radius:.5rem; }
+  table { width:100%; border-collapse:collapse; margin:1rem 0; }
+  th, td { text-align:left; padding:.5rem .4rem; border-bottom:1px solid var(--line); }
+  td.num, th.num { text-align:right; }
+</style>
+</head>
+<body><div class="wrap">{% block body %}{% endblock %}</div></body>
+</html>

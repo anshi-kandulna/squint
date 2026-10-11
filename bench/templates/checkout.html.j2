@@ -1,0 +1,20 @@
+{% extends "_base.html.j2" %}
+{% block body %}
+<h1>Checkout</h1>
+<div class="profile">
+  {% if face %}<img class="face" data-pii="face" src="{{ face }}" style="width:{{ face_px }}px;height:{{ face_px }}px">{% endif %}
+  <div>
+    <div><span class="pii" data-pii="name"><b>{{ p.name }}</b></span></div>
+    {% if show_email %}<div><span class="pii" data-pii="email">{{ p.email }}</span></div>{% endif %}
+    <div><span class="pii" data-pii="phone">{{ p.phone }}</span></div>
+  </div>
+</div>
+{% for f in fields %}
+<div class="field">
+  <label>{{ f.label }}</label>
+  <div class="input">{% if f.pii %}<span class="pii" data-pii="{{ f.pii }}">{{ f.value }}</span>{% else %}{{ f.value }}{% endif %}</div>
+</div>
+{% endfor %}
+<div class="summary">{{ qty }} × {{ product }} &nbsp; ₹{{ price }}</div>
+<button>Place my order</button>
+{% endblock %}

@@ -7,7 +7,7 @@ def _padded(b: Box, w: int, h: int) -> tuple[int, int, int, int]:
     if b.source == "dom":
         pad = 2                          # DOM geometry is already exact
     elif b.label == "face":
-        pad = int(0.6 * max(b.w, b.h))   # detector boxes are tight, so pad generously
+        pad = int(1.4 * max(b.w, b.h))   # detector box is tight; cover the whole head
     else:
         pad = 3
     return (max(0, b.x - pad), max(0, b.y - pad),

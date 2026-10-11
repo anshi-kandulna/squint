@@ -1,0 +1,23 @@
+{% extends "_base.html.j2" %}
+{% block body %}
+<h1>{{ store }}</h1>
+<div class="muted">Invoice #{{ inv }} · {{ date }}</div>
+<div class="profile" style="margin-top:1.25rem">
+  {% if face %}<img class="face" data-pii="face" src="{{ face }}" style="width:{{ face_px }}px;height:{{ face_px }}px">{% endif %}
+  <div>
+    <div class="muted">Billed to</div>
+    <div><span class="pii" data-pii="name"><b>{{ p.name }}</b></span></div>
+    {% if show_email %}<div><span class="pii" data-pii="email">{{ p.email }}</span></div>{% endif %}
+    <div><span class="pii" data-pii="phone">{{ p.phone }}</span></div>
+    <div><span class="pii" data-pii="address">{{ p.address }}</span></div>
+  </div>
+</div>
+<table>
+  <tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr>
+  {% for it in items %}
+  <tr><td>{{ it.name }}</td><td class="num">{{ it.qty }}</td><td class="num">₹{{ it.price }}</td><td class="num">₹{{ it.total }}</td></tr>
+  {% endfor %}
+</table>
+<div style="text-align:right"><b>Total ₹{{ grand }}</b></div>
+<div class="muted" style="margin-top:1rem">Paid by card <span class="pii" data-pii="card">{{ p.card }}</span></div>
+{% endblock %}

@@ -1,5 +1,6 @@
 import sys
 import time
+from squint.local.detect import faces
 from squint.schemas import Box
 from squint.local.capture import capture_page
 from squint.local.detect.ocr import run_ocr
@@ -22,14 +23,15 @@ def merge_hints(detected: list[Box], hints: list[Box]) -> list[Box]:
 
 
 def run(image_path: str, out_path: str = "redacted.png",
-        ocr_scale: float = 2.0, hints: list[Box] | None = None):
+        ocr_scale: float = 2.0, hints: list[Box] | None = None,
+        face_tile: int = 192):
     t = {}
     t0 = time.perf_counter()
     words = run_ocr(image_path, scale=ocr_scale);   t["ocr"] = time.perf_counter() - t0
     t0 = time.perf_counter()
     pii = find_pii(words);                          t["regex"] = time.perf_counter() - t0
     t0 = time.perf_counter()
-    faces = detect_faces(image_path);               t["faces"] = time.perf_counter() - t0
+    faces = detect_faces(image_path, tile=face_tile, stride=face_tile // 2); t["faces"] = time.perf_counter() - t0
     boxes = pii + faces
     if hints:
         boxes = merge_hints(boxes, hints)
