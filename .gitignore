@@ -17,3 +17,4 @@ bench/data/*
 !bench/data/.gitkeep
 bench/results/*
 !bench/results/.gitkeep
+bench/faces/

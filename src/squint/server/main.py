@@ -7,6 +7,8 @@ from squint.schemas import ActionRequest, ActionResponse
 from squint.server.vlm import decide
 
 app = FastAPI(title="squint server")
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 _last: dict = {}
 
 

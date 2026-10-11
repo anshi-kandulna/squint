@@ -1,1 +1,98 @@
-<!-- Before/after redaction viewer placeholder. -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>squint</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--fg:#e8e8e8;--mut:#8b93a1;--ok:#3ecf8e;--line:#2a2f3a}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px system-ui,sans-serif}
+header{display:flex;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0 auto 0 0}
+input{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:260px}
+button{background:#3b6fe0;color:#fff;border:0;border-radius:6px;padding:9px 16px;cursor:pointer}
+#status{color:var(--mut)}
+main{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:16px 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
+.card h2{margin:0 0 4px;font-size:14px}
+.sub{color:var(--mut);font-size:12px;margin-bottom:10px}
+img{width:100%;border-radius:6px;border:1px solid var(--line);display:block}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+td,th{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);word-break:break-all}
+.ok{color:var(--ok)}
+#log{padding:0 20px 24px;color:var(--mut);line-height:1.7}
+</style></head>
+<body>
+<header>
+  <h1>squint <span style="color:var(--mut);font-weight:400">· the model sees the screen, not your data</span></h1>
+  <span id="status">idle</span>
+  <input id="task" value="Place my order">
+  <button onclick="go()">Run</button>
+</header>
+<main>
+  <div class="card">
+    <h2>1. On your device (private)</h2>
+    <div class="sub">Original screenshot. Never leaves this machine.</div>
+    <img id="raw" alt="">
+    <table><thead><tr><th>Found</th><th>Via</th><th>Value (local only)</th></tr></thead><tbody id="rawRows"></tbody></table>
+  </div>
+  <div class="card">
+    <h2>2. After redaction</h2>
+    <div class="sub">Pixels overwritten locally, then numbered.</div>
+    <img id="red" alt="">
+    <div class="sub" style="margin-top:10px" id="timing"></div>
+  </div>
+  <div class="card">
+    <h2>3. What the server received</h2>
+    <div class="sub">Read straight from the server's /last endpoint.</div>
+    <img id="srv" alt="">
+    <table><tbody id="srvMeta"></tbody></table>
+    <table><thead><tr><th>Box</th><th>Type</th><th>Position</th></tr></thead><tbody id="srvRows"></tbody></table>
+  </div>
+</main>
+<div id="log"></div>
+<script>
+const $ = id => document.getElementById(id);
+const SERVER = "http://localhost:9000";
+let lastStep = -1;
+
+async function go() {
+  lastStep = -1;
+  await fetch("/run", {method: "POST", headers: {"Content-Type": "application/json"},
+                       body: JSON.stringify({task: $("task").value})});
+}
+
+async function refreshServer() {
+  try {
+    const d = await (await fetch(SERVER + "/last")).json();
+    if (!d.image_b64) return;
+    $("srv").src = "data:image/png;base64," + d.image_b64;
+    const kb = Math.round(d.image_b64.length * 0.75 / 1024);
+    $("srvMeta").innerHTML =
+      `<tr><td>Task</td><td>${d.task}</td></tr>` +
+      `<tr><td>Image</td><td>${kb} KB, redacted</td></tr>` +
+      `<tr><td>PII text in request</td><td class="ok">none: labels and positions only</td></tr>`;
+    $("srvRows").innerHTML = (d.boxes || []).map(b =>
+      `<tr><td>[${b.id}]</td><td>${b.label}</td><td>${b.x},${b.y} ${b.w}×${b.h}</td></tr>`).join("");
+  } catch (e) { /* server not up yet */ }
+}
+
+async function poll() {
+  try {
+    const s = await (await fetch("/state")).json();
+    $("status").textContent = s.status + (s.error ? ": " + s.error : "");
+    $("log").innerHTML = s.log.map(l =>
+      `Step ${l.step}: <b>${l.action}</b> (${l.ms} ms local) — ${l.reasoning || ""}`).join("<br>");
+    const L = s.latest;
+    if (L && L.step !== lastStep) {
+      lastStep = L.step;
+      $("raw").src = "data:image/png;base64," + L.raw_b64;
+      $("red").src = "data:image/png;base64," + L.redacted_b64;
+      $("rawRows").innerHTML = L.boxes.map(b =>
+        `<tr><td>${b.label}</td><td>${b.source}</td><td>${b.text ?? "(image region)"}</td></tr>`).join("");
+      $("timing").textContent = "Local pipeline: " +
+        Object.entries(L.timings_ms).map(([k, v]) => `${k} ${v} ms`).join(" · ");
+      refreshServer();
+    }
+  } catch (e) {}
+}
+setInterval(poll, 800);
+poll();
+</script>
+</body></html>
