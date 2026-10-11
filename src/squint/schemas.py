@@ -1,5 +1,3 @@
-"""Shared request, response, detection, and bounding-box schemas."""
-
 from __future__ import annotations
 from typing import Literal, Optional
 from pydantic import BaseModel
@@ -37,18 +35,32 @@ class RedactedBox(BaseModel):
     label: PIIType
 
 
+class Target(BaseModel):
+    """A clickable element the model can pick by number (E1, E2, ...)."""
+    id: int
+    kind: str
+    label: Optional[str] = None
+    x: int
+    y: int
+    w: int
+    h: int
+
+
 class ActionRequest(BaseModel):
     task: str
     image_b64: str          # redacted screenshot, PNG
     boxes: list[RedactedBox]
+    targets: list[Target] = []
     width: int
     height: int
+    history: list[str] = []   # what earlier steps did, placeholders only, never real values
 
 
 class ActionResponse(BaseModel):
     action: Literal["click", "type", "scroll", "done"]
+    element_id: Optional[int] = None
+    target_box_id: Optional[int] = None   # if it points at a redacted region
     x: Optional[int] = None
     y: Optional[int] = None
-    target_box_id: Optional[int] = None   # if it points at a redacted region
     text: Optional[str] = None            # may contain placeholders like {{card}}
     reasoning: Optional[str] = None

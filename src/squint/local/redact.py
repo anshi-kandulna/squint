@@ -29,3 +29,12 @@ def redact(image_path: str, boxes: list[Box], out_path: str = "redacted.png"):
         public.append(RedactedBox(id=i, x=x1, y=y1, w=x2 - x1, h=y2 - y1, label=b.label))
     cv2.imwrite(out_path, img)
     return out_path, public
+
+
+def draw_targets(path: str, targets) -> None:
+    img = cv2.imread(path)
+    for t in targets:
+        cv2.rectangle(img, (t.x, t.y), (t.x + t.w, t.y + t.h), (255, 120, 0), 2)
+        cv2.putText(img, f"E{t.id}", (t.x + 3, t.y - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6, (255, 120, 0), 2, cv2.LINE_AA)
+    cv2.imwrite(path, img)
