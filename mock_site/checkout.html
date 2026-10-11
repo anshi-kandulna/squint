@@ -1,1 +1,64 @@
 <!-- Checkout demo target placeholder. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ShopEasy Checkout</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f5f7; margin: 0; }
+    .wrap { max-width: 720px; margin: 40px auto; background: #fff; padding: 32px; border-radius: 12px; }
+    h1 { margin-top: 0; }
+    .row { display: flex; gap: 16px; margin-bottom: 16px; }
+    label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+    input { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    .col { flex: 1; }
+    .profile { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .profile img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #ddd; }
+    button { background: #1a73e8; color: #fff; border: 0; padding: 14px 28px; font-size: 16px; border-radius: 8px; cursor: pointer; }
+    .summary { background: #fafafa; padding: 12px; border-radius: 8px; margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Checkout</h1>
+
+    <div class="profile">
+      <img src="static/face.jpeg" alt="profile" data-pii="face">
+      <div>
+        <div data-pii="name"><strong>Priya Sharma</strong></div>
+        <div data-pii="email">priya.sharma@example.com</div>
+        <div data-pii="phone">+91 98765 43210</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Shipping address</label>
+        <input data-pii="address" value="42 MG Road, Bengaluru 560001">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Card number</label>
+        <input data-pii="card" value="4111 1111 1111 1111">
+      </div>
+      <div class="col">
+        <label>Expiry</label>
+        <input value="08/28">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Aadhaar (for KYC)</label>
+        <input data-pii="aadhaar" value="1234 5678 9012">
+      </div>
+    </div>
+
+    <div class="summary">1 × Wireless Mouse &nbsp; ₹1,299</div>
+
+    <button id="place-order" onclick="document.body.insertAdjacentHTML('beforeend','<p style=&quot;text-align:center&quot;>Order placed ✓</p>')">Place my order</button>
+  </div>
+</body>
+</html>
