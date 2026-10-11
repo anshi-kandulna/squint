@@ -1,0 +1,1 @@
+"""MediaPipe face detection."""
