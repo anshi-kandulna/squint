@@ -18,6 +18,7 @@ _detector = None
 
 
 def _get_detector(min_conf: float):
+    # The detector is created once, so the first min_conf wins for the whole run.
     global _detector
     if _detector is None:
         if not MODEL_PATH.exists():
@@ -49,7 +50,7 @@ def _starts(length: int, tile: int, stride: int) -> list[int]:
     return s
 
 
-def detect_faces(image_path: str, min_conf: float = 0.4,
+def detect_faces(image_path: str, min_conf: float = 0.6,
                  tile: int = 256, stride: int = 128) -> list[Box]:
     bgr = cv2.imread(image_path)
     h, w = bgr.shape[:2]
@@ -68,17 +69,17 @@ def detect_faces(image_path: str, min_conf: float = 0.4,
                     w=bb.width, h=bb.height, label="face",
                     confidence=float(d.categories[0].score), source="face"))
 
-        # merge duplicates from overlapping tiles: union overlapping boxes
-        found.sort(key=lambda b: b.confidence, reverse=True)
-        kept: list[Box] = []
-        for b in found:
-            for i, k in enumerate(kept):
-                if _contained(b, k):
-                    x1, y1 = min(b.x, k.x), min(b.y, k.y)
-                    x2, y2 = max(b.x + b.w, k.x + k.w), max(b.y + b.h, k.y + k.h)
-                    kept[i] = Box(x=x1, y=y1, w=x2 - x1, h=y2 - y1, label="face",
-                                confidence=k.confidence, source="face")
-                    break
-            else:
-                kept.append(b)
-        return kept
+    # Merge duplicates from overlapping tiles, after ALL tiles have been scanned.
+    found.sort(key=lambda b: b.confidence, reverse=True)
+    kept: list[Box] = []
+    for b in found:
+        for i, k in enumerate(kept):
+            if _contained(b, k):
+                x1, y1 = min(b.x, k.x), min(b.y, k.y)
+                x2, y2 = max(b.x + b.w, k.x + k.w), max(b.y + b.h, k.y + k.h)
+                kept[i] = Box(x=x1, y=y1, w=x2 - x1, h=y2 - y1, label="face",
+                              confidence=max(b.confidence, k.confidence), source="face")
+                break
+        else:
+            kept.append(b)
+    return kept

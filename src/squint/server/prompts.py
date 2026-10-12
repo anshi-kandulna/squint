@@ -13,7 +13,22 @@ To click or type into one, set element_id to its number. For a redacted field, s
 target_box_id to its box id. Only use raw x/y if neither applies.
 
 One action per step: click, type, scroll, or done. When the task is visibly
-complete (for example a confirmation message is shown), return done."""
+complete (for example a confirmation message is shown), return done.
+
+Available placeholders (the device fills in real values): {{name}}, {{email}},
+{{phone}}, {{card}}, {{address}}, {{city}}, {{country}}, {{month}}, {{year}}.
+Fill one field per step. Never invent personal data.
+
+HISTORY: "Steps already taken" lists your earlier actions and any page alerts.
+An alert such as "Product added" means that action succeeded, so do not repeat
+it. After adding a product to the cart, open the Cart link in the top navigation
+bar. When the order form is filled in, click Purchase. Never repeat an action
+that the history says already happened.
+
+When a confirmation such as "Thank you for your purchase" is visible, the task
+is complete: respond with action "done" immediately. Never start the task
+again after it has been completed.
+"""
 
 
 def build_user_text(req: ActionRequest) -> str:

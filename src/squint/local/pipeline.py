@@ -1,6 +1,5 @@
 import sys
 import time
-from squint.local.detect import faces
 from squint.schemas import Box
 from squint.local.capture import capture_page
 from squint.local.detect.ocr import run_ocr
@@ -8,12 +7,23 @@ from squint.local.detect.patterns import find_pii
 from squint.local.detect.faces import detect_faces
 from squint.local.redact import redact
 
+# Face filter: product photos and logos trigger weak, oddly shaped detections.
+MIN_FACE_CONF = 0.75
+FACE_ASPECT = (0.6, 1.6)   # width / height of a plausible face box
+
 
 def _mostly_inside(a: Box, b: Box, thr: float = 0.5) -> bool:
     x1, y1 = max(a.x, b.x), max(a.y, b.y)
     x2, y2 = min(a.x + a.w, b.x + b.w), min(a.y + a.h, b.y + b.h)
     inter = max(0, x2 - x1) * max(0, y2 - y1)
     return inter / max(1, a.w * a.h) > thr
+
+
+def _plausible_face(f: Box) -> bool:
+    if f.confidence < MIN_FACE_CONF:
+        return False
+    aspect = f.w / max(1, f.h)
+    return FACE_ASPECT[0] <= aspect <= FACE_ASPECT[1]
 
 
 def merge_hints(detected: list[Box], hints: list[Box]) -> list[Box]:
@@ -31,8 +41,10 @@ def run(image_path: str, out_path: str = "redacted.png",
     t0 = time.perf_counter()
     pii = find_pii(words);                          t["regex"] = time.perf_counter() - t0
     t0 = time.perf_counter()
-    faces = detect_faces(image_path, tile=face_tile, stride=face_tile // 2); t["faces"] = time.perf_counter() - t0
-    boxes = pii + faces
+    face_boxes = detect_faces(image_path, tile=face_tile, stride=face_tile // 2)
+    face_boxes = [f for f in face_boxes if _plausible_face(f)]
+    t["faces"] = time.perf_counter() - t0
+    boxes = pii + face_boxes
     if hints:
         boxes = merge_hints(boxes, hints)
     t0 = time.perf_counter()
